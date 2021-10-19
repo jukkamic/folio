@@ -18,6 +18,6 @@ from django.urls import include, path
 from django.conf import settings
 
 urlpatterns = [
-    path('wallet/', include('mybin.urls')),
-    path('news/', include('news.urls'))
+    path('folio/wallet/', include('mybin.urls')),
+    path('folio/news/', include('news.urls'))
 ]

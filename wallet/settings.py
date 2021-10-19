@@ -21,11 +21,19 @@ SECRET_KEY = my_settings.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['folio.kotkis.fi',
-                 '192.168.1.235']
+#ALLOWED_HOSTS = ['folio.kotkis.fi',
+#                 '192.168.1.235',
+#		 '54.195.99.44',
+#		 '127.0.0.1',
+#		 'localhost']
 
-CORS_ALLOWED_ORIGINS = ['http://localhost:3000',
-                        'http://folio.kotkis.fi',]
+ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
+
+#CORS_ALLOWED_ORIGINS = ['http://localhost/',
+#			'http://54.195.99.44:80',
+ #                       'http://folio.kotkis.fi/',]
+
 # Application definition
 
 INSTALLED_APPS = [
