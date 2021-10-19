@@ -29,9 +29,6 @@ def getPrice(request, symbol:str):
 
 @csrf_exempt
 def getAll(request):
-    hideSmall = request.GET.get('hideSmall')
-    if not hideSmall:
-        hideSmall="false"
     balances_total = []
     grouped_balances = []
     balances_prices = []
@@ -83,8 +80,6 @@ def getAll(request):
     except HTTPError as err:
         return JsonResponse(data=err.response.json(),  status=HTTP_503_SERVICE_UNAVAILABLE, safe=False)
 
-    if hideSmall.lower()=="true":
-        balances_prices = balances.filterSmallBalances(balances_prices)
     printResponseTimes()
     return JsonResponse(data=balances_prices, status=HTTP_200_OK, safe=False)
 
