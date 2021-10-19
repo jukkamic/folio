@@ -4,4 +4,8 @@ pip install djangorestframework
 pip install requests
 # pip install websockets
 
-uwsgi --socket folio.sock --module wallet.wsgi --chmod-socket=664
+uwsgi --socket folio.sock --module wallet.wsgi --chmod-socket=666
+sudo cp uwsgi.ini /etc/uwsgi/apps-available/folio.ini
+cd /etc/uwsgi/apps-enabled
+sudo ln -s ../apps-available/folio.ini .
+uwsgi --ini /etc/uwsgi/apps-enabled/folio.ini

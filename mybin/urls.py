@@ -1,10 +1,8 @@
 from django.contrib import admin
 from django.urls import path
 from . import views
+from django.views.decorators.cache import cache_page
 
 urlpatterns = [
-    path('mock/', views.mockAll),
-    path('custom/<str:endpoint>/', views.getCustom),
-    path('price/<str:symbol>/', views.getPrice),
-    path('', views.getAll),
+    path('', cache_page(2*60)(views.getAll)),
 ]
