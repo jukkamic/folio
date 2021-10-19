@@ -3,3 +3,5 @@ pip install django-cors-headers
 pip install djangorestframework
 pip install requests
 # pip install websockets
+
+uwsgi --socket folio.sock --module wallet.wsgi --chmod-socket=664

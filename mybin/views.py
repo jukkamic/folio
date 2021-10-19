@@ -84,9 +84,9 @@ def getAll(request):
         return JsonResponse(data=err.response.json(),  status=HTTP_503_SERVICE_UNAVAILABLE, safe=False)
 
     if hideSmall.lower()=="true":
-        balances_filtered = balances.filterSmallBalances(balances_prices)
+        balances_prices = balances.filterSmallBalances(balances_prices)
     printResponseTimes()
-    return JsonResponse(data=balances_filtered, status=HTTP_200_OK, safe=False)
+    return JsonResponse(data=balances_prices, status=HTTP_200_OK, safe=False)
 
 def timeAndAppend(balances_total, desc:str, fn):
     start = int(time.time() * 1000)
