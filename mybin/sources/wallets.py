@@ -67,11 +67,8 @@ def getErc20Txs(address:str, contract:str):
                     token_balances[token] = str( float(token_balances[token]) + sign * val )
                 else:
                     token_balances[token] = str(val)
-                print("token balances " + token_balances[token])
             for b in token_balances.keys():
-                print("Appending asset " + b + " with amount " + token_balances[b])
                 resp.append({"asset": b, "amount": str(token_balances[b])})
-            print("Done with tokens. Result", resp)
             return resp
     print(res.json()["message"])
     res.raise_for_status()
