@@ -6,4 +6,25 @@ pip install requests
 
 
 copy folio.ini to /etc/uwsgi/vassals
-sudo /usr/local/bin/uwsgi --emperor /etc/uwsgi/vassals --uid ubuntu --gid ubuntu --daemonize /var/log/uwsgi-emperor.log
+
+run and/or put into /etc/rc.local
+(sudo) /usr/local/bin/uwsgi --emperor /etc/uwsgi/vassals --chmod-socket=666 --uid ubuntu --gid ubuntu --daemonize /var/log/uwsgi-emperor.log
+
+NOTE
+        journalctl -xe
+        Unable to negotiate with 141.98.10.60 port 50578: no matching key exchange method found. Their offer: diffie-hellman-group14-sha1,diffie-hellman-group-ex>
+
+        Add following into ~/.ssh/config
+
+        Host 141.98.10.60
+            KexAlgorithms +diffie-hellman-group14-sha1
+
+LOGS and misc
+        uwsgi emperor log /var/log/uwsgi-emperor.log
+        /var/log/nginx/error.log
+        journalctl -xe
+        sudo systemctl status uwsgi / nginx
+
+STARTUP
+        /var/rc.local
+

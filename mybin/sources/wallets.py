@@ -1,5 +1,6 @@
 import requests
 from django.conf import settings
+from requests.exceptions import RequestException
 
 def callAlgo():
     balances = []
@@ -14,6 +15,7 @@ def callAlgo():
         res.raise_for_status()
 
 def callEthereum(address:str):
+    FETCH_CONTRACT = "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85"
     balances = []
     payload = {}
     payload["module"] = "account"
@@ -30,7 +32,47 @@ def callEthereum(address:str):
             wei = int(res_json["result"])
             eth = float(wei / billion / billion)
             balances = [{"asset": "ETH", "amount": str(eth)}]
+            token_balances = getErc20Txs(address, FETCH_CONTRACT)
+            for tb in token_balances:
+                balances.append(tb)
             return balances
+    print(res.json()["message"])
+    res.raise_for_status()
+
+def getErc20Txs(address:str, contract:str):
+    print("Fetching tokens")
+    payload = {}
+    payload["module"] = "account"
+    payload["action"] = "tokentx"
+    payload["contractAddress"] = contract
+    payload["address"] = address
+    payload["startblock"] = "13049017"
+    payload["apikey"] = settings.ETHERSCAN_API_KEY
+    try:
+        res = requests.get("https://api.etherscan.io/api", params=payload)
+    except RequestException as e:
+        print(e)
+        raise(e)
+    if res.status_code == requests.codes.ok:
+        token_balances = {}
+        resp = []
+        res_json = res.json()
+        if res_json["status"] == "1":
+            billion = int(1000000000)
+            for result in res_json["result"]:
+                sign = 1 if result["to"] == address else -1
+                token = result["tokenSymbol"]
+                val = float(result["value"]) / billion / billion
+                if token in token_balances.keys():
+                    token_balances[token] = str( float(token_balances[token]) + sign * val )
+                else:
+                    token_balances[token] = str(val)
+                print("token balances " + token_balances[token])
+            for b in token_balances.keys():
+                print("Appending asset " + b + " with amount " + token_balances[b])
+                resp.append({"asset": b, "amount": str(token_balances[b])})
+            print("Done with tokens. Result", resp)
+            return resp
     print(res.json()["message"])
     res.raise_for_status()
     
