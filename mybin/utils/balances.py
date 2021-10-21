@@ -29,9 +29,10 @@ def groupBalances(balance_arrays):
                 amount = float(b["amount"])
             elif "free" in b.keys():
                 amount = float(b["free"])
+                amount += float(b["locked"])
             else:
-                print("ERROR: No amount or free fields for asset ", asset)
-                raise(KeyError("Could not find fields: amount, free for asset"))
+                print("ERROR: No amount, free or locked fields for asset ", asset)
+                raise(KeyError("Could not find fields: amount, free or locked for asset"))
             if (amount > 0):
                 # Check if we have the asset already
                 addedToResp = False
