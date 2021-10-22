@@ -2,6 +2,7 @@ python -m pip install Django
 pip install django-cors-headers
 pip install djangorestframework
 pip install requests
+pip install django-clear-cache
 # pip install websockets
 
 

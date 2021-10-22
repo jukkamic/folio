@@ -4,6 +4,7 @@ The API KEY settings must be included in my_settings.py file (not included in Gi
 """
 from pathlib import Path
 from . import my_settings
+import os
 
 CRYPTOPANIC_AUTH = my_settings.CRYPTOPANIC_AUTH
 BINANCE_API_KEY = my_settings.BINANCE_API_KEY
@@ -38,6 +39,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [
     'corsheaders',
+    'clearcache',    
     'django.contrib.admin',
     'rest_framework',
     'django.contrib.auth',
@@ -78,6 +80,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'wallet.wsgi.application'
 
+CACHES = {
+   'default': {
+      'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+      'LOCATION': os.path.join(BASE_DIR, "django_cache"),
+   }
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
