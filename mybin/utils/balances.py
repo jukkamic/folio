@@ -17,30 +17,35 @@ def filterSmallBalances(balances):
             balances_response.append(b)
     return balances_response
 
+def getAssetFromList(symbol, assets):
+    for a in assets:
+        try:
+            if a["asset"] == symbol:
+                return a
+        except Exception as e:
+            print("Error at asset " + str(a), e)
+    return None
+
 def groupBalances(balance_arrays):
     resp = []
     for balance_array in balance_arrays:
-        for b in balance_array:
-            if not "asset" in b.keys():
-                print("asset not in ", b)
+        for asset in balance_array:
+            if not "asset" in asset.keys():
+                print("asset not in ", asset)
                 continue
-            asset = b["asset"]
-            if "amount" in b.keys():
-                amount = float(b["amount"])
-            elif "free" in b.keys():
-                amount = float(b["free"])
-                amount += float(b["locked"])
+            symbol = asset["asset"]
+            if "amount" in asset.keys():
+                amount = float(asset["amount"])
+            elif "free" in asset.keys():
+                amount = float(asset["free"])
+                amount += float(asset["locked"])
             else:
-                print("ERROR: No amount, free or locked fields for asset ", asset)
+                print("ERROR: No amount, free or locked fields for asset ", symbol)
                 raise(KeyError("Could not find fields: amount, free or locked for asset"))
             if (amount > 0):
-                # Check if we have the asset already
-                addedToResp = False
-                for r in resp:
-                    if "asset" in r.keys() and r["asset"] == asset:                
-                        r_amount = float(r["amount"])
-                        resp.append({"asset": asset, "amount": r_amount + amount})
-                        addedToResp = True
-                if not addedToResp:
-                    resp.append({"asset": asset, "amount": amount})
+                added_asset = getAssetFromList(symbol, resp)
+                if added_asset:
+                    added_asset["amount"] = added_asset["amount"] + amount
+                else:
+                    resp.append({"asset": symbol, "amount": amount})
     return resp

@@ -1,4 +1,5 @@
 import hmac, time, requests, hashlib
+from requests.exceptions import RequestException
 from requests.models import Response
 from django.conf import settings
 
@@ -97,12 +98,16 @@ def call(endpoint:str, payload:any = None):
     m = hmac.new(API_SECRET.encode("utf-8"), q.encode('utf-8'), hashlib.sha256)
     signature = m.hexdigest()
     payload["signature"] = signature
-    res = requests.get(BASE_URL + endpoint, 
-        params=payload,
-        headers={'X-MBX-APIKEY': API_KEY}) 
-    if res.status_code == requests.codes.ok:
-        return res
-    else:
-        print(res.request.url)
-        print(res.json())
-        res.raise_for_status()
+    try: 
+        res = requests.get(BASE_URL + endpoint, 
+            params=payload,
+            headers={'X-MBX-APIKEY': API_KEY}) 
+        if res.status_code == requests.codes.ok:
+            return res
+        else:
+            print(res.request.url)
+            print(res.json())
+            res.raise_for_status()
+    except RequestException as e:
+        print(e)
+        raise Exception("Error fetching from binance.", e)

@@ -17,7 +17,12 @@ def getNews(request, kind, filter):
     if filter != "all":
         payload["filter"] = filter
 
-    res = requests.get("https://cryptopanic.com/api/v1/posts/", params=payload)
+    try:
+        res = requests.get("https://cryptopanic.com/api/v1/posts/", params=payload)
+        res.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        raise Exception("Error fetching news.")
+
     if res.status_code == requests.codes.ok:
         return JsonResponse(data=res.json(), status=res.status_code, safe=False)
     else:

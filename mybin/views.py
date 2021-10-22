@@ -2,10 +2,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 import time
 import requests
+from requests.exceptions import RequestException
 from requests.models import HTTPError
 from .sources import binance, wallets
 from .utils import balances
-from rest_framework.status import HTTP_200_OK, HTTP_503_SERVICE_UNAVAILABLE
+from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE
 
 # BALANCES_LOCKED = [
 #                    {"asset": "ADA", "amount": "21.89281845"},
@@ -29,6 +30,7 @@ def getPrice(request, symbol:str):
 
 @csrf_exempt
 def getAll(request):
+    print("Fetching wallet data.")
     balances_total = []
     grouped_balances = []
     balances_prices = []
@@ -50,7 +52,11 @@ def getAll(request):
 
 
         # group balances by asset into total
-        grouped_balances = balances.groupBalances(balances_total)
+        try:
+            grouped_balances = balances.groupBalances(balances_total)
+        except Exception as err:
+            print(err)
+            return JsonResponse(data=err.json(),  status=HTTP_500_INTERNAL_SERVER_ERROR, safe=False)
 
         # get price info for each asset into prices
         # add prices into total
@@ -77,7 +83,7 @@ def getAll(request):
             balances_prices.append(priceInfo)
 
         request_times["Binance price list"] = int(time.time() * 1000) - start
-    except HTTPError as err:
+    except RequestException as err:
         return JsonResponse(data=err.response.json(),  status=HTTP_503_SERVICE_UNAVAILABLE, safe=False)
 
     printResponseTimes()
