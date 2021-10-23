@@ -2,6 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 import time
 import requests
+from requests import status_codes
 from requests.exceptions import RequestException
 from requests.models import HTTPError
 from .sources import binance, wallets
@@ -17,6 +18,11 @@ from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, H
 #                    ]
 # BALANCES_KUCOIN = [{"asset": "ETH", "amount": "0.0745"}]
 request_times = {}
+
+@csrf_exempt
+def getDepositAddr(request, symbol:str):
+    res = binance.getDepositAddr(symbol)
+    return JsonResponse(data=res.json(), status=res.status_code, safe=False)
 
 @csrf_exempt
 def getCustom(request, endpoint:str):
@@ -100,64 +106,3 @@ def printResponseTimes():
         print(str(r) + " " + str(request_times[r]))
         t = t + request_times[r]
     print("Total requests time:", t)
-
-@csrf_exempt
-def mockAll(request):
-    mockData = {
-        "LUNA": {
-            "amount": 7.23494866,
-            "price": 36.93,
-            "value": 267.18665401379997
-        },
-        "ETH": {
-            "amount": 0.04334374,
-            "price": 2945.35,
-            "value": 127.66248460899999
-        },
-        "FRONT": {
-            "amount": 110,
-            "price": 1.1361,
-            "value": 124.97100000000002        
-        },
-        "XTZ": {
-            "amount": 13.29471207,
-            "price": 6.063,
-            "value": 80.60583928041
-        },
-        "ENJ": {
-            "amount": 59.37579733,
-            "price": 1.272,
-            "value": 75.52601420376
-        },
-        "BTC": {
-            "amount": 0.0041872,
-            "price": 42501.83,
-            "value": 177.96366257600002
-        },
-        "BNB": {
-            "amount": 0.00046694,
-            "price": 340.2,
-            "value": 0.158852988
-        },
-        "USDT": {
-            "amount": 9.985863,
-            "price": 1,
-            "value": 9.985863
-        },
-        "ADA": {
-            "amount": 74.5371471,
-            "price": 2.154,
-            "value": 160.5530148534
-        },
-        "ATOM": {
-            "amount": 2.9058123,
-            "price": 37.3,
-            "value": 108.38679878999999
-        },
-        "ALGO": {
-            "amount": 109.21678331000001,
-            "price": 1.6992,
-            "value": 185.58115820035204
-        }
-    }
-    return JsonResponse(data=mockData, status=HTTP_200_OK, safe=False)

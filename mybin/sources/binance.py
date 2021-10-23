@@ -18,6 +18,7 @@ PRICE24_URL = "/api/v3/ticker/24hr"
 # symbol lastPrice priceChangePercent
 SAVINGS_URL = "/sapi/v1/lending/daily/product/list"
 TOKEN_LENDING_URL = "/sapi/v1/lending/daily/token/position"
+GET_DEPOSIT_ADDR = "/sapi/v1/capital/deposit/address"
 
 urlMap = {
         "liquidity": LIQUIDITY_URL,            
@@ -30,6 +31,15 @@ urlMap = {
         "savings": SAVINGS_URL,
         "token": TOKEN_LENDING_URL,
         }
+
+def getDepositAddr(symbol:str):
+    payload = {"coin": symbol}
+    try:
+        res = call(GET_DEPOSIT_ADDR, payload)
+    except Exception as e:
+        print(e)
+        raise("Could not fetch deposit address for coin " + symbol, e)
+    return res
          
 def getCustom(endpoint:str):
     print ("Endpoint", endpoint)
