@@ -20,6 +20,10 @@ from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, H
 request_times = {}
 
 @csrf_exempt
+def login(request):
+    return JsonResponse(data={"token": "test123"}, status=HTTP_200_OK, safe=False)
+
+@csrf_exempt
 def getDepositAddr(request, symbol:str):
     res = binance.getDepositAddr(symbol)
     return JsonResponse(data=res.json(), status=res.status_code, safe=False)
