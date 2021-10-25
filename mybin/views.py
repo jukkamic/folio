@@ -5,7 +5,7 @@ import requests
 from requests import status_codes
 from requests.exceptions import RequestException
 from requests.models import HTTPError
-from .sources import binance, wallets
+from .sources import binance, wallets, kucoin
 from .utils import balances
 from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE
 
@@ -19,6 +19,11 @@ from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, H
 # BALANCES_KUCOIN = [{"asset": "ETH", "amount": "0.0745"}]
 request_times = {}
 
+@csrf_exempt
+def testKucoin(request):
+    res = kucoin.getAccounts()
+    return JsonResponse(data=res, status=HTTP_200_OK, safe=False)
+    
 @csrf_exempt
 def login(request):
     return JsonResponse(data={"token": "test123"}, status=HTTP_200_OK, safe=False)
@@ -48,6 +53,7 @@ def getAll(request):
         timeAndAppend(balances_total, "Binance Lending balances", binance.getLendingBalances)
 #        timeAndAppend(balances_total, "Binance Liquidity balances", binance.getLiquidityBalances)
         timeAndAppend(balances_total, "Binance Account balances", binance.getAccountBalances)
+        timeAndAppend(balances_total, "Kucoin account balances", kucoin.getAccounts)
 
         start = int(time.time() * 1000)
         balances_total.append(wallets.callEthereum("0x8065EaCe34ab4c5df020893e13d5A42eE7675D93"))
@@ -59,7 +65,6 @@ def getAll(request):
 
   #      balances_total.append(BALANCES_KUCOIN)
  #       balances_total.append(BALANCES_LOCKED)
-
 
         # group balances by asset into total
         try:
@@ -77,6 +82,11 @@ def getAll(request):
             symbol = asset + "USDT"
 
             priceInfo = None
+            if( asset == "TEL" ):
+                res = kucoin.getPrice24h(asset)
+                price = float(res["last"])
+                change = float(res["changeRate"]) * 100
+                priceInfo = {"asset": asset, "price": price, "change": change, "value": float(price) * float(amount)}
             if( asset == "USDT" ):
                 price = 1
                 priceInfo = {"asset": asset, "price": price, "change": "0", "amount": amount, "value": amount}
@@ -92,7 +102,7 @@ def getAll(request):
                 priceInfo = {"asset": asset, "price": price, "change": change, "value": float(price) * float(amount)}
             balances_prices.append(priceInfo)
 
-        request_times["Binance price list"] = int(time.time() * 1000) - start
+        request_times["Binance and Kucoin price list"] = int(time.time() * 1000) - start
     except RequestException as err:
         return JsonResponse(data=err.response.json(),  status=HTTP_503_SERVICE_UNAVAILABLE, safe=False)
 

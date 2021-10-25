@@ -30,17 +30,22 @@ def groupBalances(balance_arrays):
     resp = []
     for balance_array in balance_arrays:
         for asset in balance_array:
-            if not "asset" in asset.keys():
-                print("asset not in ", asset)
+            if not "asset" in asset.keys() and not "currency" in asset.keys():
+                print("asset or currency not in ", asset)
                 continue
-            symbol = asset["asset"]
+            if "asset" in asset.keys():
+                symbol = asset["asset"]
+            else:
+                symbol = asset["currency"]
             if "amount" in asset.keys():
                 amount = float(asset["amount"])
+            elif "balance" in asset.keys():
+                amount = float(asset["balance"])
             elif "free" in asset.keys():
                 amount = float(asset["free"])
                 amount += float(asset["locked"])
             else:
-                print("ERROR: No amount, free or locked fields for asset ", symbol)
+                print("ERROR: No amount, balance, free or locked fields for asset ", symbol)
                 raise(KeyError("Could not find fields: amount, free or locked for asset"))
             if (amount > 0):
                 added_asset = getAssetFromList(symbol, resp)
