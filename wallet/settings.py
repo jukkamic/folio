@@ -10,6 +10,10 @@ CRYPTOPANIC_AUTH = my_settings.CRYPTOPANIC_AUTH
 BINANCE_API_KEY = my_settings.BINANCE_API_KEY
 BINANCE_API_SECRET = my_settings.BINANCE_API_SECRET
 ETHERSCAN_API_KEY = my_settings.ETHERSCAN_API_KEY
+KUCOIN_API_KEY = my_settings.KUCOIN_API_KEY
+KUCOIN_API_SECRET = my_settings.KUCOIN_API_SECRET
+KUCOIN_API_PASSPHRASE = my_settings.KUCOIN_API_PASSPHRASE
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

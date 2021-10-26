@@ -4,9 +4,9 @@ from requests.models import Response
 from django.conf import settings
 
 API_BASE_URL = 'https://api.kucoin.com'
-API_KEY = "6176dbd1547fa5000183ad37"
-API_SECRET = "4cc4ccc6-0e28-4e18-a6b6-f832c2d7ebd0"
-API_PASSPHRASE = "45apipass96"
+API_KEY = settings.KUCOIN_API_KEY
+API_SECRET = settings.KUCOIN_API_SECRET
+API_PASSPHRASE = settings.KUCOIN_API_PASSPHRASE
 
 def getPrice24h(symbol):
     return call('/api/v1/market/stats', payload={"symbol": symbol + "-USDT"}).json()["data"]
