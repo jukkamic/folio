@@ -41,7 +41,8 @@ CORS_ALLOWED_ORIGINS = ['http://localhost:3000',
                        'https://folio.kotkis.fi',
                        'http://127.0.0.1:3000',
                        'http://192.168.1.235:3000',
-                       'http://192.168.1.235:5000']
+                       'http://192.168.1.235:5000',
+                       'http://localhost:5000']
 
 # Application definition
 
