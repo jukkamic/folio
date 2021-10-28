@@ -2,10 +2,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 import requests
 from django.conf import settings
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
 request_times = {}
 
 @csrf_exempt
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def getNews(request, kind, filter):
     print("Sending request to cryptopanic.")
     payload = {
