@@ -1,7 +1,3 @@
-import hmac, time, requests, hashlib
-
-from requests.models import Response
-
 SMALL_BALANCE = 10
 
 def getPriceFromList(symbol:str, allPrices:any):

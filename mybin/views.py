@@ -43,6 +43,7 @@ def requires_scope(required_scope):
             decoded = jwt.decode(token, verify=False)
             if decoded.get("scope"):
                 token_scopes = decoded["scope"].split()
+                print("Scopes with given token: ", token_scopes)
                 for token_scope in token_scopes:
                     if token_scope == required_scope:
                         return f(*args, **kwargs)
@@ -53,32 +54,14 @@ def requires_scope(required_scope):
     return require_scope
 
 @csrf_exempt
-def testKucoin(request):
-    res = kucoin.getAccounts()
-    return JsonResponse(data=res, status=HTTP_200_OK, safe=False)
-    
-@csrf_exempt
-def login(request):
-    return JsonResponse(data={"token": "test123"}, status=HTTP_200_OK, safe=False)
-
-@csrf_exempt
 def getDepositAddr(request, symbol:str):
     res = binance.getDepositAddr(symbol)
     return JsonResponse(data=res.json(), status=res.status_code, safe=False)
 
+# @permission_classes([AllowAny]) <-- no need to be authenticated
 @csrf_exempt
-def getCustom(request, endpoint:str):
-    res = binance.getCustom(endpoint)
-    return JsonResponse(data=res.json(), status=res.status_code, safe=False)
-
-@csrf_exempt
-def getPrice(request, symbol:str):
-    res = binance.getPrice(symbol)
-    return JsonResponse(data=res.json(), status=res.status_code, safe=False)
-
-@csrf_exempt
-@api_view(['GET'])
-@requires_scope('profile')
+@api_view(['GET'])           # <-- Need to be authenticated
+@requires_scope('read:all')
 def getAll(request):
     print("Fetching wallet data.")
     balances_total = []

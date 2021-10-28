@@ -24,7 +24,7 @@ def jwt_decode_token(token):
 
     issuer = 'https://dev-88-mri1m.us.auth0.com/'
     try:
-        res = jwt.decode(token, public_key, audience='https://dev-88-mri1m.us.auth0.com/api/v2/', issuer=issuer, algorithms=['RS256'])    
+        res = jwt.decode(token, public_key, audience='https://folio.kotkis.fi/', issuer=issuer, algorithms=['RS256'])    
         return res
     except Exception as e:
         print(e)
