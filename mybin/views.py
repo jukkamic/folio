@@ -1,13 +1,16 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 import time
-import requests
 from requests import status_codes
 from requests.exceptions import RequestException
 from requests.models import HTTPError
 from .sources import binance, wallets, kucoin
 from .utils import balances
 from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from functools import wraps
+import jwt
 
 # BALANCES_LOCKED = [
 #                    {"asset": "ADA", "amount": "21.89281845"},
@@ -18,6 +21,36 @@ from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, H
 #                    ]
 # BALANCES_KUCOIN = [{"asset": "ETH", "amount": "0.0745"}]
 request_times = {}
+
+def get_token_auth_header(request):
+    """Obtains the Access Token from the Authorization Header
+    """
+    auth = request.META.get("HTTP_AUTHORIZATION", None)
+    parts = auth.split()
+    token = parts[1]
+
+    return token
+
+def requires_scope(required_scope):
+    """Determines if the required scope is present in the Access Token
+    Args:
+        required_scope (str): The scope required to access the resource
+    """
+    def require_scope(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            token = get_token_auth_header(args[0])
+            decoded = jwt.decode(token, verify=False)
+            if decoded.get("scope"):
+                token_scopes = decoded["scope"].split()
+                for token_scope in token_scopes:
+                    if token_scope == required_scope:
+                        return f(*args, **kwargs)
+            response = JsonResponse({'message': 'You don\'t have access to this resource'})
+            response.status_code = 403
+            return response
+        return decorated
+    return require_scope
 
 @csrf_exempt
 def testKucoin(request):
@@ -44,6 +77,8 @@ def getPrice(request, symbol:str):
     return JsonResponse(data=res.json(), status=res.status_code, safe=False)
 
 @csrf_exempt
+@api_view(['GET'])
+@requires_scope('profile')
 def getAll(request):
     print("Fetching wallet data.")
     balances_total = []

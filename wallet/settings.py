@@ -26,18 +26,20 @@ SECRET_KEY = my_settings.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-#ALLOWED_HOSTS = ['folio.kotkis.fi',
-#                 '192.168.1.235',
+ALLOWED_HOSTS = ['folio.kotkis.fi',
+                 '192.168.1.235',
 #		 '54.195.99.44',
-#		 '127.0.0.1',
-#		 'localhost']
+		 '127.0.0.1',
+		 'localhost']
 
-ALLOWED_HOSTS = ['*']
-CORS_ORIGIN_ALLOW_ALL = True
+#ALLOWED_HOSTS = ['*']
+#CORS_ORIGIN_ALLOW_ALL = True
 
-#CORS_ALLOWED_ORIGINS = ['http://localhost/',
+CORS_ALLOWED_ORIGINS = ['http://localhost:3000',
 #			'http://54.195.99.44:80',
- #                       'http://folio.kotkis.fi/',]
+                       'http://folio.kotkis.fi',
+                       'https://folio.kotkis.fi',
+                       'http://192.168.1.235:3000']
 
 # Application definition
 
@@ -51,6 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mybin',
+    'news'
 ]
 
 MIDDLEWARE = [
@@ -60,6 +64,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -94,12 +99,14 @@ CACHES = {
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': str(BASE_DIR / 'db.sqlite3'),
+    }
+}
+
+# Note the str() at NAME: BASE_DIR ... A bug fix.
 
 
 # Password validation
@@ -120,7 +127,34 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = {
+#    'wallet.auth0backend.Auth0',
+#    'django.contrib.auth.backends.ModelBackend'
+    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.RemoteUserBackend',
+}
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+JWT_AUTH = {
+    'JWT_PAYLOAD_GET_USERNAME_HANDLER':
+        'wallet.utils.jwt_get_username_from_payload_handler',
+    'JWT_DECODE_HANDLER':
+        'wallet.utils.jwt_decode_token',
+    'JWT_ALGORITHM': 'RS256',
+    'JWT_AUDIENCE': 'https://folio.kotkis.fi/',
+    'JWT_ISSUER': 'https://dev-88-mri1m.us.auth0.com/',
+#    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
