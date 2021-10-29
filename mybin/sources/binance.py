@@ -2,6 +2,9 @@ import hmac, time, requests, hashlib
 from requests.exceptions import RequestException
 from requests.models import Response
 from django.conf import settings
+from django.core import serializers
+
+from mybin.models import Balance, Coin, Price
 
 API_KEY = settings.BINANCE_API_KEY
 API_SECRET = settings.BINANCE_API_SECRET
@@ -20,18 +23,6 @@ SAVINGS_URL = "/sapi/v1/lending/daily/product/list"
 TOKEN_LENDING_URL = "/sapi/v1/lending/daily/token/position"
 GET_DEPOSIT_ADDR = "/sapi/v1/capital/deposit/address"
 
-urlMap = {
-        "liquidity": LIQUIDITY_URL,            
-        "lending": LENDING_URL,
-        "account": ACCOUNT_URL,
-        "fixed": FIXED_URL,
-        "dividend": DIVIDEND_URL,
-        "activity": ACTIVITY_URL,
-        "purchase": PURCHASE_URL,
-        "savings": SAVINGS_URL,
-        "token": TOKEN_LENDING_URL,
-        }
-
 def getDepositAddr(symbol:str):
     payload = {"coin": symbol}
     try:
@@ -41,32 +32,6 @@ def getDepositAddr(symbol:str):
         raise("Could not fetch deposit address for coin " + symbol, e)
     return res
          
-def getCustom(endpoint:str):
-    print ("Endpoint", endpoint)
-    url = ""
-    if endpoint in urlMap:
-        url = urlMap[endpoint]
-    else:
-        res = Response()
-        print( "Endpoint " + endpoint + " not defined.")
-        res._content = b'{"message": "Endpoint not defined"}'
-        return res
-    try:
-        payload = {}
-        if endpoint == "activity":
-            payload = {"type": "ACTIVITY"}
-        if endpoint == "purchase":
-            payload = {"lendingType": "ACTIVITY"}
-            """
-            "DAILY" for flexible, "ACTIVITY" for activity, "CUSTOMIZED_FIXED" for fixed
-            """
-        res = call(url, payload)
-        return res
-    except AttributeError as aErr:
-        print(aErr)
-    except:
-        print("Unknown error fetching from Binance API")
-
 def getLiquidityBalances():
     balances = []
     pools = call(LIQUIDITY_URL).json()
@@ -81,10 +46,33 @@ def getDividend():
     return call(DIVIDEND_URL).json()["rows"]
 
 def getAccountBalances():
-    return call(ACCOUNT_URL).json()["balances"]
+    res = call(ACCOUNT_URL).json()["balances"]
+    balances:Balance = []
+    try:
+        for balance in res:
+            b = Balance()
+            b.coin = Coin(symbol = balance["asset"])
+            b.amount = float(balance["free"])
+            b.amount += float(balance["locked"])
+            if( b.amount > 0 ):
+                balances.append(b)
+    except Exception as e:
+        print(e)
+    return balances
 
 def getLendingBalances():
-    return call(LENDING_URL).json()["positionAmountVos"]
+    res = call(LENDING_URL).json()["positionAmountVos"]
+    balances:Balance = []
+    try:
+        for balance in res:
+            b = Balance()
+            b.coin = Coin(symbol = balance["asset"])
+            b.amount = float(balance["amount"])
+            if( b.amount > 0 ):
+                balances.append(b)
+    except Exception as e:
+        print(e)
+    return balances
 
 def getPrice(symbol:str):
     return requests.get(BASE_URL + PRICE_URL, params={"symbol": symbol})
@@ -93,7 +81,11 @@ def getAllPrices():
     return requests.get(BASE_URL + PRICE_URL)
 
 def getAllPrices24h(symbol):
-    return requests.get(BASE_URL + PRICE24_URL, params={"symbol": symbol})
+    res = requests.get(BASE_URL + PRICE24_URL, params={"symbol": symbol}).json()
+    price = Price()
+    price.change24h = float(res["priceChangePercent"])
+    price.price = float(res["lastPrice"])
+    return price
 
 def call(endpoint:str, payload:any = None):
     if payload == None:

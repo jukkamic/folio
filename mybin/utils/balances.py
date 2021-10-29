@@ -1,3 +1,5 @@
+from mybin.models import Balance, Coin
+
 SMALL_BALANCE = 10
 
 def getPriceFromList(symbol:str, allPrices:any):
@@ -13,40 +15,25 @@ def filterSmallBalances(balances):
             balances_response.append(b)
     return balances_response
 
-def getAssetFromList(symbol, assets):
-    for a in assets:
+def getAssetFromList(symbol, balances):
+    for b in balances:
         try:
-            if a["asset"] == symbol:
-                return a
+            if b.coin.symbol == symbol:
+                return b
         except Exception as e:
-            print("Error at asset " + str(a), e)
-    return None
+            print("Error at balance " + str(b), e)
+    return None        
 
 def groupBalances(balance_arrays):
-    resp = []
+    grouped_balances:Balance = []
     for balance_array in balance_arrays:
         for asset in balance_array:
-            if not "asset" in asset.keys() and not "currency" in asset.keys():
-                print("asset or currency not in ", asset)
-                continue
-            if "asset" in asset.keys():
-                symbol = asset["asset"]
-            else:
-                symbol = asset["currency"]
-            if "amount" in asset.keys():
-                amount = float(asset["amount"])
-            elif "balance" in asset.keys():
-                amount = float(asset["balance"])
-            elif "free" in asset.keys():
-                amount = float(asset["free"])
-                amount += float(asset["locked"])
-            else:
-                print("ERROR: No amount, balance, free or locked fields for asset ", symbol)
-                raise(KeyError("Could not find fields: amount, free or locked for asset"))
+            symbol = asset.coin.symbol
+            amount = asset.amount
             if (amount > 0):
-                added_asset = getAssetFromList(symbol, resp)
+                added_asset = getAssetFromList(symbol, grouped_balances)
                 if added_asset:
-                    added_asset["amount"] = added_asset["amount"] + amount
+                    added_asset.amount += amount
                 else:
-                    resp.append({"asset": symbol, "amount": amount})
-    return resp
+                    grouped_balances.append( Balance( coin=Coin( symbol=symbol ), amount=amount ) )
+    return grouped_balances

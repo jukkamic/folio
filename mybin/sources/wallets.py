@@ -1,6 +1,7 @@
 import requests
 from django.conf import settings
 from requests.exceptions import RequestException
+from mybin.models import Balance, Coin
 
 def callAlgo():
     balances = []
@@ -16,12 +17,11 @@ def callAlgo():
 
 def callEthereum(address:str):
     FETCH_CONTRACT = "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85"
-    balances = []
+    model_balances:Balance = []
     payload = {}
     payload["module"] = "account"
     payload["action"] = "balance"
     payload["address"] = address
-    #"0x8065EaCe34ab4c5df020893e13d5A42eE7675D93"
     payload["tag"] = "latest"
     payload["apikey"] = settings.ETHERSCAN_API_KEY
     res = requests.get("https://api.etherscan.io/api", params=payload)
@@ -31,11 +31,11 @@ def callEthereum(address:str):
             billion = int(1000000000)
             wei = int(res_json["result"])
             eth = float(wei / billion / billion)
-            balances = [{"asset": "ETH", "amount": str(eth)}]
-            token_balances = getErc20Txs(address, FETCH_CONTRACT)
-            for tb in token_balances:
-                balances.append(tb)
-            return balances
+            model_balances.append( Balance(coin=Coin(symbol="ETH"), amount=eth))
+#            token_balances = getErc20Txs(address, FETCH_CONTRACT)
+#            for tb in token_balances:
+#                model_balances.append( tb )
+            return model_balances
     print(res.json()["message"])
     res.raise_for_status()
 
@@ -54,6 +54,7 @@ def getErc20Txs(address:str, contract:str):
         print(e)
         raise(e)
     if res.status_code == requests.codes.ok:
+        balances:Balance = []
         token_balances = {}
         resp = []
         res_json = res.json()
@@ -69,7 +70,8 @@ def getErc20Txs(address:str, contract:str):
                     token_balances[token] = str(val)
             for b in token_balances.keys():
                 resp.append({"asset": b, "amount": str(token_balances[b])})
-            return resp
+                balances.append( Balance(coin=Coin(symbol=b), amount=float(token_balances[b])) )
+            return balances
     print(res.json()["message"])
     res.raise_for_status()
     

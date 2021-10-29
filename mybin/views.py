@@ -63,7 +63,6 @@ def getDepositAddr(request, symbol:str):
 @api_view(['GET'])           # <-- Need to be authenticated
 @requires_scope('read:all')
 def getAll(request):
-    print("Fetching wallet data.")
     balances_total = []
     grouped_balances = []
     balances_prices = []
@@ -88,40 +87,41 @@ def getAll(request):
         try:
             grouped_balances = balances.groupBalances(balances_total)
         except Exception as err:
-            print(err)
+            print("Error grouping balances", err)
             return JsonResponse(data=err.json(),  status=HTTP_500_INTERNAL_SERVER_ERROR, safe=False)
 
         # get price info for each asset into prices
         # add prices into total
         start = int(time.time() * 1000)
-        for b in grouped_balances:
-            asset = b["asset"]
-            amount = b["amount"]
-            symbol = asset + "USDT"
+        try:
+            for b in grouped_balances:
+                asset = b.coin.symbol
+                amount = b.amount
+                symbol = asset + "USDT"
 
-            priceInfo = None
-            if( asset == "TEL" ):
-                res = kucoin.getPrice24h(asset)
-                price = float(res["last"])
-                change = float(res["changeRate"]) * 100
-                priceInfo = {"asset": asset, "price": price, "change": change, "value": float(price) * float(amount)}
-            if( asset == "USDT" ):
-                price = 1
-                priceInfo = {"asset": asset, "price": price, "change": "0", "amount": amount, "value": amount}
-            if( asset == "BETH" ):
-                beth_res = binance.getAllPrices24h("BETHETH").json()
-                eth_res = binance.getAllPrices24h("ETHUSDT").json()
-                price = float(beth_res["lastPrice"]) * float(eth_res["lastPrice"])
-                priceInfo = {"asset": asset, "price": price, "change": beth_res["priceChangePercent"], "value": float(price) * float(amount)} 
-            if( not priceInfo ):
-                res = binance.getAllPrices24h(symbol)
-                price = res.json()["lastPrice"]
-                change = res.json()["priceChangePercent"]
-                priceInfo = {"asset": asset, "price": price, "change": change, "value": float(price) * float(amount)}
-            balances_prices.append(priceInfo)
+                priceInfo = None
+                if( asset == "TEL" ):
+                    kucoin_res = kucoin.getPrice24h(asset)
+                    priceInfo = {"asset": asset, "price": kucoin_res.price, "change": kucoin_res.change24h, "value": kucoin_res.price * amount}
+                if( asset in ["USDT", "BUSD", "USDC"] ):
+                    price = 1
+                    priceInfo = {"asset": asset, "price": price, "change": "0", "amount": amount, "value": amount}
+                if( asset == "BETH" ):
+                    beth_res = binance.getAllPrices24h("BETHETH")
+                    eth_res = binance.getAllPrices24h("ETHUSDT")
+                    price = beth_res.price * eth_res.price
+                    priceInfo = {"asset": asset, "price": price, "change": beth_res.change24h, "value": float(price) * float(amount)} 
+                if( not priceInfo ):
+                    general_res = binance.getAllPrices24h(symbol)
+                    priceInfo = {"asset": asset, "price": general_res.price, "change": general_res.change24h, "value": float(general_res.price) * float(amount)}
+                balances_prices.append(priceInfo)
+        except Exception as e:
+            print("Error creating price info. ", e)
+            return JsonResponse(data=e.json(),  status=HTTP_500_INTERNAL_SERVER_ERROR, safe=False)
 
         request_times["Binance and Kucoin price list"] = int(time.time() * 1000) - start
     except RequestException as err:
+        print(err)
         return JsonResponse(data=err.response.json(),  status=HTTP_503_SERVICE_UNAVAILABLE, safe=False)
 
     printResponseTimes()
