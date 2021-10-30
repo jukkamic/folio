@@ -20,4 +20,5 @@ from django.conf import settings
 urlpatterns = [
     path('folio/wallet/', include('mybin.urls')),
     path('folio/news/', include('news.urls')),
+    path('folio/blog/', include('blog.urls')),
 ]
