@@ -24,7 +24,7 @@ def postsApi(request):
         return JsonResponse("Failed to add.", safe=False)
 
 @csrf_exempt
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 def getLatest(request, number):
     try:
         resp = []
@@ -37,8 +37,17 @@ def getLatest(request, number):
         return JsonResponse(data={"error": "500"}, status=500, safe=False)
     
 @csrf_exempt
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'DELETE'])
 def getPost(request, id):
-    p = Post.objects.get(id=id)
-    resp = {"id": p.id, "author": p.author.name, "title": p.title, "content": p.content}
-    return JsonResponse(data=json.dumps(resp), safe=False)
+    try:
+        if (request.method == 'GET'):
+            p = Post.objects.get(id=id)
+            resp = {"id": p.id, "author": p.author.name, "title": p.title, "content": p.content}
+            return JsonResponse(data=json.dumps(resp), safe=False)
+        elif (request.method == 'DELETE'):
+            p = Post.objects.get(id=id)
+            p.delete()
+            return JsonResponse(data={"message": "Post id " + str(id) + " deleted successfully"}, safe=False)
+    except Exception as e:
+        print(e)
+        return JsonResponse(data=json.dumps(e), status=500, safe=False)
