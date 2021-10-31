@@ -10,7 +10,7 @@ from blog.serializers import PostSerializer, AuthorSerializer
 
 @csrf_exempt
 @api_view(['GET', 'POST'])
-def postApi(request):
+def postsApi(request):
     if (request.method == 'GET'):
         posts = Post.objects.all()
         post_serializer = PostSerializer(posts, many=True)
@@ -22,3 +22,23 @@ def postApi(request):
             post_serializer.save()
             return JsonResponse("Added successfully!", safe=False)
         return JsonResponse("Failed to add.", safe=False)
+
+@csrf_exempt
+@api_view(['GET', 'POST'])
+def getLatest(request, number):
+    try:
+        resp = []
+        posts = Post.objects.order_by('-created_on')[:number]
+        for p in posts:
+            resp.append({"id": p.id, "author": p.author.name, "title": p.title, "content": p.content})
+        return JsonResponse(data=json.dumps(resp), safe=False)
+    except Exception as e:
+        print(e)
+        return JsonResponse(data={"error": "500"}, status=500, safe=False)
+    
+@csrf_exempt
+@api_view(['GET', 'POST'])
+def getPost(request, id):
+    p = Post.objects.get(id=id)
+    resp = {"id": p.id, "author": p.author.name, "title": p.title, "content": p.content}
+    return JsonResponse(data=json.dumps(resp), safe=False)
