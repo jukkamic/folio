@@ -63,6 +63,9 @@ def getDepositAddr(request, symbol:str):
 @api_view(['GET'])           # <-- Need to be authenticated
 @requires_scope('read:all')
 def getAll(request):
+    beth2eth = False
+    if (request.query_params.get("beth2eth") == "true"):
+        beth2eth = True
     balances_total = []
     grouped_balances = []
     balances_prices = []
@@ -107,10 +110,15 @@ def getAll(request):
                     price = 1
                     priceInfo = {"asset": asset, "price": price, "change": "0", "amount": amount, "value": amount}
                 if( asset == "BETH" ):
-                    beth_res = binance.getAllPrices24h("BETHETH")
-                    eth_res = binance.getAllPrices24h("ETHUSDT")
-                    price = beth_res.price * eth_res.price
-                    priceInfo = {"asset": asset, "price": price, "change": beth_res.change24h, "value": float(price) * float(amount)} 
+                    if ( not beth2eth ):
+                        beth_res = binance.getAllPrices24h("BETHETH")
+                        eth_res = binance.getAllPrices24h("ETHUSDT")
+                        price = beth_res.price * eth_res.price
+                        priceInfo = {"asset": asset, "price": price, "change": beth_res.change24h, "value": float(price) * float(amount)} 
+                    else:
+                        eth_res = binance.getAllPrices24h("ETHUSDT")
+                        price = eth_res.price
+                        priceInfo = {"asset": asset, "price": price, "change": eth_res.change24h, "value": float(price) * float(amount)} 
                 if( not priceInfo ):
                     general_res = binance.getAllPrices24h(symbol)
                     priceInfo = {"asset": asset, "price": general_res.price, "change": general_res.change24h, "value": float(general_res.price) * float(amount)}
