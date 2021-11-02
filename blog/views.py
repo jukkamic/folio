@@ -12,14 +12,15 @@ from blog.serializers import PostSerializer, AuthorSerializer
 @api_view(['GET', 'POST', 'PUT'])
 def postsApi(request):
     if (request.method == 'GET'):
+        resp = []
         posts = Post.objects.all()
-        post_serializer = PostSerializer(posts, many=True)
-        return JsonResponse(data=json.dumps(post_serializer.data), safe=False)
+        for p in posts:
+            resp.append({"id": p.id, "author_name": p.author.name, "title": p.title, 
+                        "content": p.content, "created_on": p.created_on, "updated_on": p.updated_on})
+        return JsonResponse(data=json.dumps(resp, default=str), safe=False)
     elif request.method=='POST':
         post_data = JSONParser().parse(request)
-        print(post_data);
         post_serializer = PostSerializer(data=post_data)
-        print("checking validity")
         if post_serializer.is_valid():
             post_serializer.save()
             return JsonResponse("Added successfully!", safe=False)
