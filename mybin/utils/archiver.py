@@ -1,6 +1,12 @@
 from mybin.sources import binance, kucoin, wallets
 from mybin.utils import balances
 from mybin.serializers import WalletSerializer
+from apscheduler.schedulers.background import BackgroundScheduler
+
+def start():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(fetchStoreWalletData, 'interval', minutes=1)
+    scheduler.start()    
 
 def fetchStoreWalletData():
     balances_total = []

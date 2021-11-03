@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mybin',
+    'mybin.apps.MybinConfig',
     'news',
     'blog'
 ]
