@@ -2,16 +2,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 import time
 from django.utils import timezone
-import pytz
-from datetime import datetime, timedelta
-from requests import status_codes
-from requests.exceptions import RequestException
-from requests.models import HTTPError
+from zoneinfo import ZoneInfo
+from datetime import timedelta, tzinfo
 from .sources import binance, wallets, kucoin
 from .utils import balances
 from mybin.models import Wallet
-from mybin.serializers import WalletSerializer
-from mybin.utils import archiver
 from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -101,7 +96,7 @@ def getAll(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def getBalances(request, days):
-    enddate = timezone.now()
+    enddate = timezone.now(tzinfo=ZoneInfo("Europe/Helsinki"))
     startdate = enddate - timedelta(days=days)
     resp = []
     try:

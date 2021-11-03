@@ -4,7 +4,7 @@ from mybin.serializers import WalletSerializer
 from apscheduler.schedulers.background import BackgroundScheduler
 
 def start():
-    scheduler = BackgroundScheduler()
+    scheduler = BackgroundScheduler(timezone="Europe/Helsinki")
     scheduler.add_job(fetchStoreWalletData, 'interval', minutes=60)
     scheduler.start()    
 
