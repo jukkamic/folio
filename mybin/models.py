@@ -37,4 +37,16 @@ class Balance(models.Model):
 
     def __str__(self):
         return self.coin.symbol + " " + str(self.amount)
+
+class Wallet(models.Model):
+    value_usdt = models.FloatField()
+    value_btc = models.FloatField()
+    time = models.DateTimeField(auto_now_add=True)
+
+    def __init__(self, *args, **kwargs):
+        super(Wallet, self).__init__(*args, **kwargs)
+
+    def __str__(self):
+        return str(self.value_usdt) + " " + str(self.value_btc) + " " + (self.strftime('%d.%m. %Y %H:%M'))
+
     
