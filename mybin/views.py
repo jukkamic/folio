@@ -1,25 +1,23 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 import time
+from django.utils import timezone
+import pytz
+from datetime import datetime, timedelta
 from requests import status_codes
 from requests.exceptions import RequestException
 from requests.models import HTTPError
 from .sources import binance, wallets, kucoin
 from .utils import balances
+from mybin.models import Wallet
+from mybin.serializers import WalletSerializer
 from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from functools import wraps
 import jwt
+import json
 
-# BALANCES_LOCKED = [
-#                    {"asset": "ADA", "amount": "21.89281845"},
-#                    {"asset": "HNT", "amount": "7.71000000"},
-#                    {"asset": "ADA", "amount": "44.36045450"},
-#                    {"asset": "ADA", "amount": "30.00000000"},
-#                    {"asset": "ALGO", "amount": "109.01983250"}
-#                    ]
-# BALANCES_KUCOIN = [{"asset": "ETH", "amount": "0.0745"}]
 request_times = {}
 
 def get_token_auth_header(request):
@@ -57,8 +55,7 @@ def requires_scope(required_scope):
 def getDepositAddr(request, symbol:str):
     res = binance.getDepositAddr(symbol)
     return JsonResponse(data=res.json(), status=res.status_code, safe=False)
-
-# @permission_classes([AllowAny]) <-- no need to be authenticated
+    
 @csrf_exempt
 @api_view(['GET'])           # <-- Need to be authenticated
 @requires_scope('read:all')
@@ -136,7 +133,40 @@ def populateBalancesWithPrices(beth2eth, grouped_balances):
             if (asset == "ETH"):
                 eth_priceInfo = priceInfo
         balances_prices.append(priceInfo)
+    save_wallet_balance(balances_prices)
     return balances_prices
+
+#@requires_scope('read:all')
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def getBalances(request, days):
+    enddate = timezone.now()
+    startdate = enddate - timedelta(days=days)
+    resp = []
+    try:
+        res = Wallet.objects.filter(time__range=[startdate, enddate])
+        for wallet in res:
+            resp.append({"id": wallet.id, "value_usdt": wallet.value_usdt, "btc_usdt": wallet.btc_usdt, "value_btc": wallet.value_btc, "time": str(wallet.time)})        
+        return JsonResponse(data=json.dumps(resp), status=HTTP_200_OK, safe=False)
+    except Exception as e:
+        print(e)
+        return JsonResponse(data=json.dumps(e), status=HTTP_500_INTERNAL_SERVER_ERROR, safe=False)
+
+def save_wallet_balance(balances_prices):
+    wallet_data = []
+    value_usdt = 0
+    btc_usdt = 0
+    for bp in balances_prices:
+        if (bp["asset"] == "BTC"):
+            btc_usdt = bp["price"]
+        value_usdt += bp["value"]
+    wallet_data = {"value_usdt": value_usdt, "btc_usdt": btc_usdt, "value_btc": float(value_usdt) / float(btc_usdt)}
+    wallet_serializer = WalletSerializer(data=wallet_data)
+    if wallet_serializer.is_valid():
+        wallet_serializer.save()
+    else:    
+        print(wallet_serializer.errors)
 
 def eth_price(asset, amount):
     eth_res = binance.getAllPrices24h("ETHUSDT")

@@ -39,9 +39,13 @@ class Balance(models.Model):
         return self.coin.symbol + " " + str(self.amount)
 
 class Wallet(models.Model):
-    value_usdt = models.FloatField()
-    value_btc = models.FloatField()
+    value_usdt = models.FloatField(null=False, blank=False)
+    value_btc = models.FloatField(null=False, blank=False)
+    btc_usdt = models.FloatField(null=False, blank=False)
     time = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-time']
 
     def __init__(self, *args, **kwargs):
         super(Wallet, self).__init__(*args, **kwargs)
