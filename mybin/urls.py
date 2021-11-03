@@ -5,7 +5,7 @@ from django.views.decorators.cache import cache_page
 
 urlpatterns = [
     path('', cache_page(25)(views.getAll)),
-#    path('', views.getAll),
     path('deposits/addr/<str:symbol>/', views.getDepositAddr),
-    path('history/<int:days>/', views.getBalances),
+    path('history/<int:days>/', views.getHistory),
+    path('history/store/', views.storeBalances),
 ]

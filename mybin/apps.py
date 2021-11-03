@@ -4,6 +4,6 @@ class MybinConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'mybin'
 
-    def ready(self):
-        from mybin.utils import archiver
-        archiver.start()
+#    def ready(self):
+#        from mybin.utils import archiver
+#        archiver.start()

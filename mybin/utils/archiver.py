@@ -2,11 +2,12 @@ from mybin.sources import binance, kucoin, wallets
 from mybin.utils import balances
 from mybin.serializers import WalletSerializer
 from apscheduler.schedulers.background import BackgroundScheduler
+import json
 
-def start():
-    scheduler = BackgroundScheduler(timezone="Europe/Helsinki")
-    scheduler.add_job(fetchStoreWalletData, 'interval', minutes=60)
-    scheduler.start()    
+# def start():
+#     scheduler = BackgroundScheduler(timezone="Europe/Helsinki")
+#     scheduler.add_job(fetchStoreWalletData, 'interval', minutes=60)
+#     scheduler.start()    
 
 def fetchStoreWalletData():
     balances_total = []
@@ -27,9 +28,9 @@ def fetchStoreWalletData():
             print("Error creating price info. ", e)
     except Exception as err:
         print(err)
-    save_wallet_balance(balances_prices)
+    _save_wallet_balance(balances_prices)
 
-def save_wallet_balance(balances_prices):
+def _save_wallet_balance(balances_prices):
     wallet_data = []
     value_usdt = 0
     btc_usdt = 0
@@ -42,6 +43,6 @@ def save_wallet_balance(balances_prices):
     if wallet_serializer.is_valid():
         wallet_serializer.save()
     else:    
-        print(wallet_serializer.errors)
+        print("Error serializing wallet. ", wallet_serializer.errors)
 
 
