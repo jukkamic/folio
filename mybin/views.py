@@ -2,8 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 import time
 from django.utils import timezone
-from zoneinfo import ZoneInfo
-from datetime import timedelta, tzinfo
+from datetime import timedelta
 from .sources import binance, wallets, kucoin
 from .utils import balances
 from mybin.models import Wallet
@@ -96,7 +95,7 @@ def getAll(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def getBalances(request, days):
-    enddate = timezone.now(tzinfo=ZoneInfo("Europe/Helsinki"))
+    enddate = timezone.now()
     startdate = enddate - timedelta(days=days)
     resp = []
     try:
