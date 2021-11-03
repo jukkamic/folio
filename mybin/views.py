@@ -121,8 +121,10 @@ def populateBalancesWithPrices(beth2eth, grouped_balances):
             if ( not beth2eth ):
                 priceInfo = beth_eth_price(asset, amount, eth_priceInfo) 
             else:
-                priceInfo = eth_price(asset, amount) 
-                eth_priceInfo = priceInfo                
+                if (not eth_priceInfo):
+                    eth_priceInfo = eth_price("ETH", amount)                 
+                priceInfo = {"asset": asset, "price": eth_priceInfo["price"], "change": eth_priceInfo["change"], 
+                            "value": eth_priceInfo["value"]}
         if( asset == "ETH" and eth_priceInfo):
             eth_priceInfo["asset"] = asset
             eth_priceInfo["amount"] = amount
@@ -131,6 +133,8 @@ def populateBalancesWithPrices(beth2eth, grouped_balances):
         if( not priceInfo ):
             general_res = binance.getAllPrices24h(symbol)
             priceInfo = {"asset": asset, "price": general_res.price, "change": general_res.change24h, "value": float(general_res.price) * float(amount)}
+            if (asset == "ETH"):
+                eth_priceInfo = priceInfo
         balances_prices.append(priceInfo)
     return balances_prices
 
