@@ -5,7 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 def start():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(fetchStoreWalletData, 'interval', minutes=1)
+    scheduler.add_job(fetchStoreWalletData, 'interval', minutes=60)
     scheduler.start()    
 
 def fetchStoreWalletData():
