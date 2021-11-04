@@ -19,7 +19,7 @@ def getPrice24h(symbol):
         price.price = float(res["last"])
         price.source_time = int(res["time"])
         price.recorded_time = int(time.time() * 1000)
-        price.change24h = float(res["changeRate"])
+        price.change24h = float(res["changeRate"]) * float(100)
         price.chartLink = API_BASE_URL + "/api/v1/market/stats?symbol=" + symbol + "-USDT"
         return price
     except Exception as e:
