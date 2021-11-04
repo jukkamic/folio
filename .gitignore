@@ -2,6 +2,7 @@ log.txt
 wallet/my_settings.py
 django_cache/
 .vscode/
+bot/settings.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
