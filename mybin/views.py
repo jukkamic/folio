@@ -36,6 +36,10 @@ def getAll(request):
         balances_total.append(wallets.callEthereum("0x8065EaCe34ab4c5df020893e13d5A42eE7675D93"))
         request_times["Metamask balances"] = int(time.time() * 1000) - start
 
+        start = int(time.time() * 1000)
+        balances_total.append(wallets.callAlgo())
+        request_times["Algorand balances"] = int(time.time() * 1000) - start
+
         try:
             grouped_balances = balances.groupBalances(balances_total)
         except Exception as err:

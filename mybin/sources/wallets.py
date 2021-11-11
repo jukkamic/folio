@@ -4,12 +4,12 @@ from requests.exceptions import RequestException
 from mybin.models import Balance, Coin
 
 def callAlgo():
-    balances = []
+    balances:Balance = []
     res = requests.get("https://algoexplorerapi.io/v2/accounts/U67IYL7HW3P4Q3BFBM3UUABXHXCJ472N3I7ORAR2OP4XKCRBYF6ENG6TCQ")
     if res.status_code == requests.codes.ok:
         res_json = res.json()
         amount = float(float(res_json["amount"]) / 1000000)
-        balances = [{"asset": "ALGO", "amount": amount}]
+        balances.append( Balance(coin=Coin(symbol="ALGO"), amount=amount))
         return balances
     else:
         print(res.json()["msg"])
