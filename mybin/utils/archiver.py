@@ -18,6 +18,7 @@ def fetchStoreWalletData():
         balances_total.append(binance.getAccountBalances())
         balances_total.append(kucoin.getAccounts())
         balances_total.append(wallets.callEthereum("0x8065EaCe34ab4c5df020893e13d5A42eE7675D93"))
+        balances_total.append(wallets.callAlgo())
         try:
             grouped_balances = balances.groupBalances(balances_total)
         except Exception as err:
