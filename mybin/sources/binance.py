@@ -6,11 +6,52 @@ from django.core import serializers
 
 from mybin.models import Balance, Coin, Price
 
+# ISOLATED MARGIN ACCOUNT RESPONSE
+# {
+# "assets": [
+# {
+# "baseAsset": {
+# "asset": "BTC",
+# "borrowEnabled": true,
+# "borrowed": "0",
+# "free": "0.00112887",
+# "interest": "0",
+# "locked": "0",
+# "netAsset": "0.00112887",
+# "netAssetOfBtc": "0.00112887",
+# "repayEnabled": true,
+# "totalAsset": "0.00112887"
+# },
+# "quoteAsset": {
+# "asset": "USDT",
+# "borrowEnabled": true,
+# "borrowed": "0",
+# "free": "150.07886",
+# "interest": "0",
+# "locked": "0",
+# "netAsset": "150.07886",
+# "netAssetOfBtc": "0.00339779",
+# "repayEnabled": true,
+# "totalAsset": "150.07886"
+# },
+# "symbol": "BTCUSDT",
+# "isolatedCreated": true,
+# "marginLevel": "999",
+# "marginLevelStatus": "EXCESSIVE",
+# "marginRatio": "10",
+# "indexPrice": "44168.56313279",
+# "liquidatePrice": "0",
+# "liquidateRate": "0",
+# "tradeEnabled": true,
+# "enabled": true
+# },
+
 API_KEY = settings.BINANCE_API_KEY
 API_SECRET = settings.BINANCE_API_SECRET
 BASE_URL = "https://api.binance.com"
 ACCOUNT_URL = "/api/v3/account"
 LENDING_URL = "/sapi/v1/lending/union/account"
+ISOLATED_URL = "/sapi/v1/margin/isolated/account"
 FIXED_URL = "/sapi/v1/lending/project/position/list"
 LIQUIDITY_URL = "/sapi/v1/bswap/liquidity"
 DIVIDEND_URL = "/sapi/v1/asset/assetDividend"
