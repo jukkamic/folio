@@ -52,6 +52,7 @@ BASE_URL = "https://api.binance.com"
 ACCOUNT_URL = "/api/v3/account"
 LENDING_URL = "/sapi/v1/lending/union/account"
 ISOLATED_URL = "/sapi/v1/margin/isolated/account"
+CROSS_URL = "/sapi/v1/margin/account"
 FIXED_URL = "/sapi/v1/lending/project/position/list"
 LIQUIDITY_URL = "/sapi/v1/bswap/liquidity"
 DIVIDEND_URL = "/sapi/v1/asset/assetDividend"
@@ -63,6 +64,21 @@ PRICE24_URL = "/api/v3/ticker/24hr"
 SAVINGS_URL = "/sapi/v1/lending/daily/product/list"
 TOKEN_LENDING_URL = "/sapi/v1/lending/daily/token/position"
 GET_DEPOSIT_ADDR = "/sapi/v1/capital/deposit/address"
+
+def getMarginBalances():
+    res = call(CROSS_URL).json()["userAssets"]
+    balances:Balance = []
+    try:
+        for balance in res:
+            b = Balance()
+            b.coin = Coin(symbol = balance["asset"])
+            b.amount = float(balance["free"])
+            b.amount += float(balance["locked"])
+            if( b.amount > 0 ):
+                balances.append(b)
+    except Exception as e:
+        print(e)
+    return balances
 
 def getDepositAddr(symbol:str):
     payload = {"coin": symbol}
@@ -116,7 +132,10 @@ def getLendingBalances():
     return balances
 
 def getPrice(symbol:str):
-    return requests.get(BASE_URL + PRICE_URL, params={"symbol": symbol})
+    print("Fethincg price for ", symbol)
+    res = requests.get(BASE_URL + PRICE_URL, params={"symbol": symbol})
+    print("Fetch result ", res)
+    return res.json()
 
 def getAllPrices():
     return requests.get(BASE_URL + PRICE_URL)

@@ -8,4 +8,7 @@ urlpatterns = [
     path('deposits/addr/<str:symbol>/', views.getDepositAddr),
     path('history/<int:days>/', views.getHistory),
     path('history/store/', views.storeBalances),
+    # path('margin/', views.getMarginBalances),
+    # path('account/', views.getAccountBalances),
+    path('price/<str:symbol>/', cache_page(5)(views.getPrice)),
 ]

@@ -12,6 +12,26 @@ from rest_framework.permissions import AllowAny
 import json
 
 @csrf_exempt
+def getPrice(request, symbol:str):
+    print("Get price for symbol ", symbol)
+    res = binance.getPrice(symbol)
+    print("Get result ", res)
+    print("Return JsonResponse")
+    return JsonResponse(data={"symbol": res["symbol"], "price": res["price"]}, status=HTTP_200_OK, safe=False)
+
+@csrf_exempt
+def getAccountBalances(request):
+    res = binance.getAccountBalances()
+    print(json.dumps(res))
+    return JsonResponse(data=json.dumps(res), status=HTTP_200_OK, safe=False)
+
+@csrf_exempt
+def getMarginBalances(request):
+    res = binance.getMarginBalances()
+    print(res)
+    return JsonResponse(data=res, status=HTTP_200_OK, safe=False)
+
+@csrf_exempt
 def getDepositAddr(request, symbol:str):
     res = binance.getDepositAddr(symbol)
     return JsonResponse(data=res.json(), status=res.status_code, safe=False)
@@ -28,7 +48,7 @@ def getAll(request):
     balances_prices = []
     request_times = {}
     try:
-        request_times = timeAndAppend(request_times, balances_total, "Binance Lending balances", binance.getLendingBalances)
+        # request_times = timeAndAppend(request_times, balances_total, "Binance Lending balances", binance.getLendingBalances)
         request_times = timeAndAppend(request_times, balances_total, "Binance Account balances", binance.getAccountBalances)
         request_times = timeAndAppend(request_times, balances_total, "Kucoin account balances", kucoin.getAccounts)
 
@@ -36,9 +56,9 @@ def getAll(request):
         balances_total.append(wallets.callEthereum("0x8065EaCe34ab4c5df020893e13d5A42eE7675D93"))
         request_times["Metamask balances"] = int(time.time() * 1000) - start
 
-        start = int(time.time() * 1000)
-        balances_total.append(wallets.callAlgo())
-        request_times["Algorand balances"] = int(time.time() * 1000) - start
+        # start = int(time.time() * 1000)
+        # balances_total.append(wallets.callAlgo())
+        # request_times["Algorand balances"] = int(time.time() * 1000) - start
 
         try:
             grouped_balances = balances.groupBalances(balances_total)
