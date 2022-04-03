@@ -132,10 +132,8 @@ def getLendingBalances():
     return balances
 
 def getPrice(symbol:str):
-    print("Fethincg price for ", symbol)
     res = requests.get(BASE_URL + PRICE_URL, params={"symbol": symbol})
-    print("Fetch result ", res)
-    return res.json()
+    return res
 
 def getAllPrices():
     return requests.get(BASE_URL + PRICE_URL)

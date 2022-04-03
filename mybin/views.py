@@ -13,11 +13,8 @@ import json
 
 @csrf_exempt
 def getPrice(request, symbol:str):
-    print("Get price for symbol ", symbol)
-    res = binance.getPrice(symbol)
-    print("Get result ", res)
-    print("Return JsonResponse")
-    return JsonResponse(data={"symbol": res["symbol"], "price": res["price"]}, status=HTTP_200_OK, safe=False)
+    res = binance.getPrice(symbol).json()
+    return JsonResponse(data={"symbol": res["symbol"], "price": float(res["price"])}, status=HTTP_200_OK, safe=False)
 
 @csrf_exempt
 def getAccountBalances(request):
