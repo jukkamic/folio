@@ -14,11 +14,11 @@ def fetchStoreWalletData():
     grouped_balances = []
     balances_prices = []
     try:
-        balances_total.append(binance.getLendingBalances())
+#        balances_total.append(binance.getLendingBalances())
         balances_total.append(binance.getAccountBalances())
         balances_total.append(kucoin.getAccounts())
         balances_total.append(wallets.callEthereum("0x8065EaCe34ab4c5df020893e13d5A42eE7675D93"))
-        balances_total.append(wallets.callAlgo())
+#        balances_total.append(wallets.callAlgo())
         try:
             grouped_balances = balances.groupBalances(balances_total)
         except Exception as err:
@@ -39,8 +39,11 @@ def _save_wallet_balance(balances_prices):
         if (bp["asset"] == "BTC"):
             btc_usdt = bp["price"]
         value_usdt += bp["value"]
-    wallet_data = {"value_usdt": value_usdt, "btc_usdt": btc_usdt, "value_btc": float(value_usdt) / float(btc_usdt)}
-    wallet_serializer = WalletSerializer(data=wallet_data)
+    try:
+        wallet_data = {"value_usdt": value_usdt, "btc_usdt": btc_usdt, "value_btc": float(value_usdt) / float(btc_usdt)}
+        wallet_serializer = WalletSerializer(data=wallet_data)
+    except Exception as err:
+        print(err)
     if wallet_serializer.is_valid():
         wallet_serializer.save()
     else:    
