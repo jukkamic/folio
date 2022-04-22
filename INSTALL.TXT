@@ -5,6 +5,8 @@ pip install requests
 pip install django-clear-cache
 # pip install websockets
 
+crontab -e
+0 * * * * /home/ubuntu/myenv/bin/python3 /opt/folio/bot/archiverbot.py >> /opt/folio/archiverbot.log
 
 copy folio.ini to /etc/uwsgi/vassals
 

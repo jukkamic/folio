@@ -53,6 +53,7 @@ ACCOUNT_URL = "/api/v3/account"
 LENDING_URL = "/sapi/v1/lending/union/account"
 ISOLATED_URL = "/sapi/v1/margin/isolated/account"
 CROSS_URL = "/sapi/v1/margin/account"
+CROSS_WALLET_URL = "/sapi/v2/futures/loan/wallet"
 FIXED_URL = "/sapi/v1/lending/project/position/list"
 LIQUIDITY_URL = "/sapi/v1/bswap/liquidity"
 DIVIDEND_URL = "/sapi/v1/asset/assetDividend"
@@ -66,7 +67,8 @@ TOKEN_LENDING_URL = "/sapi/v1/lending/daily/token/position"
 GET_DEPOSIT_ADDR = "/sapi/v1/capital/deposit/address"
 
 def getMarginBalances():
-    res = call(CROSS_URL).json()["userAssets"]
+    res = call(CROSS_WALLET_URL).json()["crossCollaterals"]
+    print(res)
     balances:Balance = []
     try:
         for balance in res:
