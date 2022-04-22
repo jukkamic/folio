@@ -1,7 +1,7 @@
 from mybin.sources import binance, kucoin, wallets
 from mybin.utils import balances
 from mybin.serializers import WalletSerializer
-from apscheduler.schedulers.background import BackgroundScheduler
+import http.client
 import json
 
 # def start():
@@ -34,10 +34,16 @@ def fetchStoreWalletData():
 def _save_wallet_balance(balances_prices):
     wallet_data = []
     value_usdt = 0
-    btc_usdt = 0
+
+    conn = http.client.HTTPSConnection("folio.kotkis.fi")
+#    conn = http.client.HTTPConnection("localhost:8000")
+    conn.request("GET", "/folio/wallet/price/BTCUSDT/")
+    res = conn.getresponse()
+    data = res.read()
+    response_json = json.loads(data.decode("utf-8"))
+    btc_usdt = response_json["price"]
+
     for bp in balances_prices:
-        if (bp["asset"] == "BTC"):
-            btc_usdt = bp["price"]
         value_usdt += bp["value"]
     try:
         wallet_data = {"value_usdt": value_usdt, "btc_usdt": btc_usdt, "value_btc": float(value_usdt) / float(btc_usdt)}
