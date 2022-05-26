@@ -141,11 +141,23 @@ def getAllPrices():
     return requests.get(BASE_URL + PRICE_URL)
 
 def getAllPrices24h(symbol):
-    res = requests.get(BASE_URL + PRICE24_URL, params={"symbol": symbol}).json()
+    if (symbol.startswith("LD") == True):
+        print("trimming symbol ", symbol)
+        symbol = symbol[2:]
+        print("symbol now: ", symbol)
     price = Price()
-    price.change24h = float(res["priceChangePercent"])
-    price.price = float(res["lastPrice"])
-    return price
+    try:
+        res = requests.get(BASE_URL + PRICE24_URL, params={"symbol": symbol}).json()
+        price.change24h = float(res["priceChangePercent"])
+        price.price = float(res["lastPrice"])
+        return price
+    except KeyError as ke:
+        print("Fetching symbol ", symbol)
+        print(res)
+        raise Exception("Key error fetching price from Binance.", ke)
+    except RequestException as e:
+        print(e)
+        raise Exception("Request exception fetching price from Binance.", e)
 
 def call(endpoint:str, payload:any = None):
     if payload == None:
