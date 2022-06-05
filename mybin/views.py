@@ -1,4 +1,3 @@
-from msilib.schema import Error
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 import time
