@@ -11,4 +11,5 @@ urlpatterns = [
     path('margin/', views.getMarginBalances),
     # path('account/', views.getAccountBalances),
     path('price/<str:symbol>/', cache_page(5)(views.getPrice)),
+    path('query/', views.query),
 ]

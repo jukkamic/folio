@@ -1,3 +1,4 @@
+from msilib.schema import Error
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 import time
@@ -9,7 +10,31 @@ from mybin.models import Wallet
 from rest_framework.status import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_503_SERVICE_UNAVAILABLE
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from rest_framework.parsers import JSONParser
 import json
+
+@csrf_exempt
+@api_view(['POST'])
+@auth_utils.requires_scope('read:all')
+def query(request):
+    try:
+        print("query: ", request)
+        query_data = JSONParser().parse(request)
+        print("query data: ", query_data)
+        endpoint = query_data['endpoint']
+        if not endpoint:
+            return JsonResponse(data={"message": "No endpoint"}, status=HTTP_503_SERVICE_UNAVAILABLE, safe=False)
+        try:
+            payload = json.loads(query_data['params'])
+        except Exception as ex:
+            print("payload json problem: ", ex)
+            payload = None
+        print("payload: ", payload)
+        res = binance.call(endpoint=endpoint, payload=payload)
+        print("response from binance: ", res)
+        return JsonResponse(data=res.json(), status=HTTP_200_OK, safe=False)
+    except Exception as err:
+        print("View error:", err)
 
 @csrf_exempt
 def getPrice(request, symbol:str):
@@ -35,7 +60,7 @@ def getDepositAddr(request, symbol:str):
     
 @csrf_exempt
 @api_view(['GET'])           # <-- Need to be authenticated
-@auth_utils.requires_scope('read:all')
+# @auth_utils.requires_scope('read:all')
 def getAll(request):
     beth2eth = False
     if (request.query_params.get("beth2eth") == "true"):
