@@ -109,12 +109,14 @@ def getAccountBalances():
     balances:Balance = []
     try:
         for balance in res:
-            b = Balance()
-            b.coin = Coin(symbol = balance["asset"])
-            b.amount = float(balance["free"])
-            b.amount += float(balance["locked"])
-            if( b.amount > 0 ):
-                balances.append(b)
+            asset = balance["asset"]
+            if ( asset != "ETHW" ):
+                b = Balance()
+                b.coin = Coin(symbol = asset)
+                b.amount = float(balance["free"])
+                b.amount += float(balance["locked"])
+                if( b.amount > 0 ):
+                    balances.append(b)
     except Exception as e:
         print(e)
     return balances
