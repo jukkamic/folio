@@ -68,11 +68,15 @@ def populateBalancesWithPrices(beth2eth, grouped_balances):
             eth_priceInfo["value"] = float(amount) * float(eth_priceInfo["price"])
             priceInfo = eth_priceInfo
         if( not priceInfo ):
-            general_res = binance.getAllPrices24h(symbol)
-            priceInfo = {"asset": asset, "price": general_res.price, "change": general_res.change24h, "value": float(general_res.price) * float(amount)}
-            if (asset == "ETH"):
-                eth_priceInfo = priceInfo
-        balances_prices.append(priceInfo)
+            try:
+                general_res = binance.getAllPrices24h(symbol)
+                priceInfo = {"asset": asset, "price": general_res.price, "change": general_res.change24h, "value": float(general_res.price) * float(amount)}
+                if (asset == "ETH"):
+                    eth_priceInfo = priceInfo
+            except Exception as e:
+                print (e)
+        if( priceInfo != None ):
+            balances_prices.append(priceInfo)
     return balances_prices
 
 def eth_price(asset, amount):
