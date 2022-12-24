@@ -156,7 +156,7 @@ def getAllPrices24h(symbol):
     except KeyError as ke:
         print("Fetching symbol ", symbol)
         print(res)
-        raise Exception("Key error fetching price from Binance.", ke)
+        raise Exception("Key error fetching price (" + symbol + ") from Binance.", ke)
     except RequestException as e:
         print(e)
         raise Exception("Request exception fetching price from Binance.", e)
