@@ -71,7 +71,7 @@ def getAll(request):
     try:
         # request_times = timeAndAppend(request_times, balances_total, "Binance Lending balances", binance.getLendingBalances)
         request_times = timeAndAppend(request_times, balances_total, "Binance Account balances", binance.getAccountBalances)
-        request_times = timeAndAppend(request_times, balances_total, "Kucoin account balances", kucoin.getAccounts)
+        # request_times = timeAndAppend(request_times, balances_total, "Kucoin account balances", kucoin.getAccounts)
 
         start = int(time.time() * 1000)
         balances_total.append(wallets.callEthereum("0x8065EaCe34ab4c5df020893e13d5A42eE7675D93"))
